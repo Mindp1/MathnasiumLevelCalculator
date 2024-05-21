@@ -42,7 +42,7 @@ class Student {
     }
 
     addEnrollment(start: Date, end: Date, holdDays: number) {
-        if (start.getTime() < end.getTime()) {
+        if (start.getTime() <= end.getTime()) {
             this.EnrollmentPeriods.push(new StartEndDatePair(start, end, holdDays));
             this.calculateMonthsEnrolled();
             this.calculateLevel();
@@ -62,7 +62,8 @@ class Student {
 
             let diffInMonths = enrollmentPeriod.endDate.getMonth() - enrollmentPeriod.startDate.getMonth()
                 + (12 * (enrollmentPeriod.endDate.getFullYear() - enrollmentPeriod.startDate.getFullYear()));
-
+            console.log("end:"+enrollmentPeriod.endDate.getMonth());
+            console.log("start:"+enrollmentPeriod.startDate.getMonth())
             this.monthsEnrolled += diffInMonths;
             this.monthsEnrolled -= Math.floor(enrollmentPeriod.daysOnHold / 30);
 
@@ -87,8 +88,16 @@ class Student {
     }
 
     get dateForNextLevel() {
-        let temp = new Date(this.EnrollmentPeriods[this.EnrollmentPeriods.length - 1].endDate.valueOf());
+        if (this.invalidEnrollment) {
+            return null;
+        }
+        let end = this.EnrollmentPeriods[this.EnrollmentPeriods.length - 1].endDate;
+        let temp = new Date(Date.UTC(end.getFullYear(), end.getMonth(), end.getDate()));
         temp.setMonth(temp.getMonth() + (6-(this.monthsEnrolled%6)));
+        if (temp.getDate() > 27) {
+            temp.setDate(1);
+            temp.setMonth(temp.getMonth() + 1);
+        }
         return temp;
     }
 
@@ -97,8 +106,15 @@ class Student {
     }
 
     get dateForNextNextLevel() {
+        if (this.invalidEnrollment) {
+            return null;
+        }
         let temp = new Date(this.EnrollmentPeriods[this.EnrollmentPeriods.length - 1].endDate.valueOf());
         temp.setMonth(temp.getMonth() + (12-(this.monthsEnrolled%6)));
+        if (temp.getDate() > 27) {
+            temp.setDate(1);
+            temp.setMonth(temp.getMonth() + 1);
+        }
         return temp;
     }
 

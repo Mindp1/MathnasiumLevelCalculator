@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <body>
-Enrollment Periods: <label for="enrollPeriods"></label><select id="enrollPeriods" onchange="createDateInputs()"></select><br>
+Enrollment Periods: <label for="enrollPeriods"></label><select id="enrollPeriods"
+                                                               onchange="createDateInputs()"></select><br>
 <div id="dateInputs"></div>
 Days on Hold: <label for="holdDays"></label><input type="number" id="holdDays" min="0" value="0"><br>
 <button onclick="createStudent()">Create Student</button>
@@ -9,10 +10,10 @@ Days on Hold: <label for="holdDays"></label><input type="number" id="holdDays" m
 <script src="Student.js"></script>
 <script>
     // On window load, create options for the select element
-    window.onload = function() {
+    window.onload = function () {
         let select = document.getElementById('enrollPeriods');
         // Change from 5 if you want to increase/decrease max enrollment periods
-        for(let i = 1; i <= 5; i++) {
+        for (let i = 1; i <= 5; i++) {
             let option = document.createElement('option');
             option.value = i.toString(10);
             option.text = i.toString(10);
@@ -27,8 +28,10 @@ Days on Hold: <label for="holdDays"></label><input type="number" id="holdDays" m
         let numOfPeriods = parseInt(document.getElementById('enrollPeriods').value);
         let dateInputsDiv = document.getElementById('dateInputs');
         dateInputsDiv.innerHTML = '';
-        for(let i = 0; i < numOfPeriods; i++) {
-            let dateString = i < numOfPeriods - 1 ? `Start Date ${i + 1}: <input type="date" id="startDate${i + 1}"><br> End Date ${i + 1}: <input type="date" id="endDate${i + 1}"><br>` : `Start Date ${i + 1}: <input type="date" id="startDate${i + 1}"><br>`;
+        for (let i = 0; i < numOfPeriods; i++) {
+            let dateString = i < numOfPeriods - 1 ?
+                `Start Date ${i + 1}: <input type="date" id="startDate${i + 1}"><br> End Date ${i + 1}: <input type="date" id="endDate${i + 1}"><br>`
+                : `Start Date ${i + 1}: <input type="date" id="startDate${i + 1}"><br>`;
             dateInputsDiv.innerHTML += dateString;
         }
     }
@@ -38,26 +41,39 @@ Days on Hold: <label for="holdDays"></label><input type="number" id="holdDays" m
         let student = new Student();
         // Get the values from the input fields
         let holdDays = parseInt(document.getElementById('holdDays').value, 10);
-        for(let i = 0; i + 1 < numOfPeriods; i++) {
-            let startDate = new Date(document.getElementById(`startDate${i + 1}`).value);
-            let endDate = i < numOfPeriods - 1 ? new Date(document.getElementById(`endDate${i + 1}`).value) : null;
-            student.addEnrollment(startDate,endDate,0);
+        for (let i = 0; i + 1 < numOfPeriods; i++) {
+
+            let fullDate = document.getElementById(`startDate${i + 1}`).value;
+            let parts = fullDate.split("-");
+            let startDate = new Date(Date.UTC(parts[0],parts[1],parts[2]));
+
+            fullDate = document.getElementById(`endDate${i + 1}`).value;
+            parts = fullDate.split("-");
+            let endDate = new Date(Date.UTC(parts[0],parts[1],parts[2]));
+            student.addEnrollment(startDate, endDate, 0);
         }
+
         // Get value from last enrollment start date, set end date as today.
-        let startDate = new Date(document.getElementById(`startDate${numOfPeriods}`).value);
-        let endDate = new Date(); // today
-        student.addEnrollment(startDate,endDate,holdDays);
+        let fullDate = document.getElementById(`startDate${numOfPeriods}`).value;
+        let parts = fullDate.split("-");
+        let startDate = new Date(Date.UTC(parts[0],parts[1]-1,parts[2]));
+
+        let today = new Date();
+        let endDate = new Date(Date.UTC(today.getFullYear(), today.getMonth(), 1)); // Make the current date the first of this month
+
+        student.addEnrollment(startDate, endDate, holdDays);
         let nextDate = student.dateForNextLevel;
         let nextNextDate = student.dateForNextNextLevel;
         // alert the user, but still print out the information
-        if (student.hasInvalidEnrollment){
+        if (student.hasInvalidEnrollment) {
             alert("Entered Enrollment is Invalid (start date is after end date)")
-        }
-        document.getElementById('output').innerHTML = `Current level: ${student.getLevel}, been here for ${student.getMonthsEnrolled} months<br>
+        } else {
+            document.getElementById('output').innerHTML = `Current level: ${student.getLevel}, been here for ${student.getMonthsEnrolled} months<br>
             Next level: ${student.nextLevel}, date for next level:
             ${nextDate.getMonth() + 1}/${nextDate.getDate()}/${nextDate.getFullYear()}<br>
             Next next level: ${student.nextNextLevel}, date for next next level:
             ${nextNextDate.getMonth() + 1}/${nextNextDate.getDate()}/${nextNextDate.getFullYear()}<br>`;
+        }
     }
 </script>
 </body>
